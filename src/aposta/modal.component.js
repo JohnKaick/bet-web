@@ -62,7 +62,6 @@ class ModalAposta extends Component {
             valor: this.state.valor,
             retorno: this.state.retorno,
             grupo: this.state.grupo,
-            grupos: []
         }).then(() => {
             this.close()
             this.props.getApostas()

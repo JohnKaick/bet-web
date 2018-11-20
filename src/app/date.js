@@ -1,5 +1,5 @@
 import React from 'react'
-
+import 'moment/locale/pt-br.js'
 import { DatePickerInput } from 'rc-datepicker';
 
 export default ({ name, value, onChange }) => (
@@ -10,7 +10,7 @@ export default ({ name, value, onChange }) => (
         value={value}
         name={name}
         format='DD/MM/YYYY'
-        locale="pt-br"
+        locale='pt-br'
         showOnInputClick={true}
     />
 )
