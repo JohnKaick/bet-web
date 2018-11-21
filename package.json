@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
-    "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "rc-datepicker": "^5.0.13",
     "react": "^16.6.3",
