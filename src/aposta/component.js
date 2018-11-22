@@ -224,14 +224,15 @@ class App extends Component {
                                         }
                                         </Accordion.Title>
                                         <Accordion.Content active={activeIndex === i}>
-                                            <Button.Group floated='right' vertical>
-                                                <Button color='green' circular icon='check' id={a._id} onClick={this.greenClick}/>
-                                                <Button color='red' circular icon='cancel' id={a._id} onClick={this.redClick}/>
-                                            </Button.Group>
-                                            <b> Data: {new Date(a.createdAt).toLocaleDateString()}</b> 
+                                            <ModalAposta id={a._id} getApostas={this.get}>
+                                                <Button color='blue' floated='right' circular icon='pencil'/>
+                                            </ModalAposta>
+                                            <b> Data: {new Date(a.createdAt).toLocaleDateString('pt-br')}</b> 
                                             <br />
                                             <b> Nome: {a.nome}</b> 
                                             <br />
+                                            <Button color='red' floated='right' circular icon='cancel' id={a._id} onClick={this.redClick}/>
+                                            <Button color='green' floated='right' circular icon='check' id={a._id} onClick={this.greenClick}/>
                                             <b> Grupo: {a.grupo.nome}</b>
                                             <br />
                                             <b> Aposta: {a.valor}</b> / <b> Retorno: {a.retorno}</b>

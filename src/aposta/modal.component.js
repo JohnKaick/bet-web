@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Form, Button, Input, Header, Icon, Select } from 'semantic-ui-react';
-import { create } from './api';
+import { create, getOne, update, remover } from './api';
 import { getAll as getGrupo } from './../grupo/api';
 import DatePicker from './../app/date';
 
@@ -13,8 +13,10 @@ class ModalAposta extends Component {
         this.onOpen = this.onOpen.bind(this)
         this.onGrupoSelected = this.onGrupoSelected.bind(this)
         this.onSalvar = this.onSalvar.bind(this)
+        this.onRemover = this.onRemover.bind(this)
         this.state = {
             open: false,
+            id: null,
             nome: '',
             data: null,
             valor: null,
@@ -33,20 +35,49 @@ class ModalAposta extends Component {
     }
 
     onOpen() {
-        this.setState({ 
-            open: true,
-            nome: '',
-            data: null,
-            valor: null,
-            retorno: null,
-            grupo: null,
-            grupos: []
-        })
-        getGrupo().then((grs) => {
-            this.setState({ 
-                grupos: grs.data
+        if (this.props.id) {
+            getOne(this.props.id).then((apt) => {
+                this.setState({ 
+                    open: true,
+                    id: apt.data._id,
+                    nome: apt.data.nome,
+                    data: apt.data.createdAt,
+                    valor: apt.data.valor,
+                    retorno: apt.data.retorno,
+                    grupo: apt.data.grupo.nome
+                })
+            }).catch(() => {
+                this.setState({
+                    id: null,
+                    open: true,
+                    nome: '',
+                    data: null,
+                    valor: null,
+                    retorno: null,
+                    grupo: null,
+                    grupos: []
+                })
             })
-        })
+        } else {
+            getGrupo().then((grs) => {
+                this.setState({ 
+                    grupos: grs.data
+                })
+            }).catch(() => {
+                this.setState({ 
+                    grupos: []
+                })
+            })
+            this.setState({ 
+                id: null,
+                open: true,
+                nome: '',
+                data: new Date(),
+                valor: null,
+                retorno: null,
+                grupo: null,
+            })
+        }
     }
 
     onGrupoSelected(e, { name, value }) {
@@ -56,20 +87,41 @@ class ModalAposta extends Component {
     }
 
     onSalvar() {
-        create({
-            nome: this.state.nome,
-            data: this.state.data,
-            valor: this.state.valor,
-            retorno: this.state.retorno,
-            grupo: this.state.grupo,
-        }).then(() => {
+        if (this.state.id) {
+            update({
+                id: this.state.id,
+                nome: this.state.nome,
+                data: this.state.data,
+                valor: this.state.valor,
+                retorno: this.state.retorno,
+                grupo: this.state.grupo,
+            }).then(() => {
+                this.close()
+                this.props.getApostas()
+            })
+        } else {
+            create({
+                nome: this.state.nome,
+                data: this.state.data,
+                valor: this.state.valor,
+                retorno: this.state.retorno,
+                grupo: this.state.grupo,
+            }).then(() => {
+                this.close()
+                this.props.getApostas()
+            })
+        }
+    }
+
+    onRemover() {
+        remover(this.state.id).then(() => {
             this.close()
             this.props.getApostas()
         })
     }
 
     render() {
-        const { open, nome, valor, retorno, grupo, data, grupos } = this.state
+        const { open, id, nome, valor, retorno, grupo, data, grupos } = this.state
 
         return (
             <Modal
@@ -82,18 +134,29 @@ class ModalAposta extends Component {
                 <Header>Criar aposta</Header>
                 <Modal.Content>
                     <Form>
-                        <Form.Field 
+                        { id ? (
+                            <Form.Field 
                             width={16}
-                            control={Select}
+                            control={Input}
                             label='Grupo'
                             name='grupo'
-                            options={grupos.map(g => {
-                                return { key: g._id, text: g.nome, value: g._id }
-                            })}
-                            onChange={this.onGrupoSelected}
+                            value={grupo}
+                            disabled
                             />
-                        <Form.Group>
+                        ) : (
                             <Form.Field 
+                                width={16}
+                                control={Select}
+                                label='Grupo'
+                                name='grupo'
+                                options={grupos.map(g => {
+                                    return { key: g._id, text: g.nome, value: g._id }
+                                })}
+                                onChange={this.onGrupoSelected}
+                                />
+                        )}
+                        <Form.Group>
+                            <Form.Field
                                 width={8}
                                 control={Input}
                                 label='Nome'
@@ -128,6 +191,13 @@ class ModalAposta extends Component {
                     </Form>
                 </Modal.Content>
                 <Modal.Actions>
+                    { id && (
+                    <Button color='red'
+                        icon="trash"
+                        content='Excluir'
+                        floated='left'
+                        onClick={this.onRemover} />
+                    )}
                     <Button primary
                             icon="dollar sign"
                             content='Apostar'
